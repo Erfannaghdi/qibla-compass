@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Compass</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f3f3f3;
+        }
+
+        .compass {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .needle {
+            position: absolute;
+            width: 4px;
+            height: 120px;
+            background-color: red; /* Sun-aligned needle */
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%);
+            z-index: 2;
+        }
+
+        .qibla-needle {
+            position: absolute;
+            width: 4px;
+            height: 120px;
+            background-color: green; /* Qibla direction needle */
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%);
+            z-index: 1;
+        }
+
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #city {
+            width: 220px;
+        }
+    </style>
+</head>
+<body>
+    <div class="compass">
+        <div class="needle"></div> <!-- Red needle: aligns with phone orientation -->
+        <div class="qibla-needle"></div> <!-- Green needle: points to Qibla -->
+    </div>
+
+    <input type="text" id="city" placeholder="Enter your city..." list="cities">
+    <datalist id="cities">
+        <option value="New York">
+        <option value="London">
+        <option value="Mecca">
+        <option value="Paris">
+        <option value="Tokyo">
+    </datalist>
+    <button onclick="updateQibla()">Find Qibla</button>
+
+    <script>
+        // Coordinates of Mecca (Qibla)
+        const qiblaLat = 21.4225;
+        const qiblaLon = 39.8262;
+
+        // City data (latitude and longitude)
+        const cities = {
+            "New York": { lat: 40.7128, lon: -74.0060 },
+            "London": { lat: 51.5074, lon: -0.1278 },
+            "Mecca": { lat: 21.4225, lon: 39.8262 },
+            "Paris": { lat: 48.8566, lon: 2.3522 },
+            "Tokyo": { lat: 35.6895, lon: 139.6917 }
+        };
+
+        let deviceOrientation = 0; // Alpha rotation (device direction)
+        let qiblaDirection = 0; // Calculated Qibla direction
+
+        // Check if DeviceOrientationEvent is supported
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", (event) => {
+                deviceOrientation = event.alpha; // Get the phone's rotation angle
+                updateNeedles();
+            });
+        } else {
+            alert("Your device does not support compass functionality.");
+        }
+
+        // Calculate Qibla direction based on user location
+        function calculateQibla(lat, lon) {
+            const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
+            const latRad = lat * (Math.PI / 180);
+            const qiblaLatRad = qiblaLat * (Math.PI / 180);
+
+            const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
+            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) -
+                      Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
+
+            let angle = Math.atan2(y, x) * (180 / Math.PI);
+            return (angle + 360) % 360; // Normalize angle
+        }
+
+        // Update the direction of the needles
+        function updateNeedles() {
+            const redNeedle = document.querySelector(".needle");
+            const greenNeedle = document.querySelector(".qibla-needle");
+
+            // Rotate red needle based on device orientation
+            redNeedle.style.transform = `translate(-50%, -100%) rotate(${-deviceOrientation}deg)`;
+
+            // Rotate green needle based on Qibla direction relative to device orientation
+            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+        }
+
+        // Update Qibla direction when the user selects a city
+        function updateQibla() {
+            const cityInput = document.getElementById("city").value;
+            const city = cities[cityInput];
+
+            if (city) {
+                qiblaDirection = calculateQibla(city.lat, city.lon);
+                alert(`Qibla direction for ${cityInput} is calculated.`);
+                updateNeedles();
+            } else {
+                alert("City not found. Please choose a valid city.");
+            }
+        }
+    </script>
+</body>
+</html>

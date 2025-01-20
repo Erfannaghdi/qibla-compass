@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قبله‌نما</title>
+    <title>قبله‌نمای واقعی</title>
     <style>
         body {
             display: flex;
@@ -25,15 +25,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .needle {
+        .fixed-needle {
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: red; /* عقربه‌ی ثابت به سمت سر گوشی */
+            background-color: red; /* عقربه ثابت */
             top: 50%;
             left: 50%;
-            transform-origin: center top;
-            transform: translate(-50%, 0) rotate(0deg);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%);
             z-index: 2;
         }
 
@@ -44,10 +44,30 @@
             background-color: green; /* عقربه‌ی قبله */
             top: 50%;
             left: 50%;
-            transform-origin: center top;
-            transform: translate(-50%, 0) rotate(0deg);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%);
             z-index: 1;
         }
+
+        .directions {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: center;
+        }
+
+        .direction {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .N { top: 5px; left: 50%; transform: translateX(-50%); }
+        .E { right: 5px; top: 50%; transform: translateY(-50%); }
+        .S { bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .W { left: 5px; top: 50%; transform: translateY(-50%); }
 
         input, button {
             margin: 10px 0;
@@ -64,7 +84,13 @@
 </head>
 <body>
     <div class="compass">
-        <div class="needle"></div> <!-- عقربه‌ی ثابت -->
+        <div class="directions">
+            <div class="direction N">N</div>
+            <div class="direction E">E</div>
+            <div class="direction S">S</div>
+            <div class="direction W">W</div>
+        </div>
+        <div class="fixed-needle"></div> <!-- عقربه ثابت -->
         <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
@@ -85,11 +111,9 @@
     <button onclick="updateQibla()">پیدا کردن قبله</button>
 
     <script>
-        // مختصات قبله (مکه)
         const qiblaLat = 21.4225;
         const qiblaLon = 39.8262;
 
-        // اطلاعات شهرها (عرض و طول جغرافیایی)
         const cities = {
             "تهران": { lat: 35.6892, lon: 51.3890 },
             "مشهد": { lat: 36.2605, lon: 59.6168 },
@@ -104,50 +128,46 @@
             "شاهرود": { lat: 36.4180, lon: 54.9763 }
         };
 
-        let deviceOrientation = 0; // چرخش دستگاه
-        let qiblaDirection = 0; // زاویه قبله
+        let deviceOrientation = 0;
+        let qiblaDirection = 0;
 
-        // بررسی پشتیبانی از DeviceOrientationEvent
         if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", (event) => {
-                deviceOrientation = event.alpha; // دریافت زاویه‌ی دستگاه
+                deviceOrientation = event.alpha; 
                 updateNeedles();
             });
         } else {
             alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
         }
 
-        // محاسبه زاویه قبله بر اساس موقعیت کاربر
         function calculateQibla(lat, lon) {
             const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
             const latRad = lat * (Math.PI / 180);
             const qiblaLatRad = qiblaLat * (Math.PI / 180);
 
             const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
-            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) -
+            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) - 
                       Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
 
             let angle = Math.atan2(y, x) * (180 / Math.PI);
-            return (angle + 360) % 360; // نرمال‌سازی زاویه
+            return (angle + 360) % 360;
         }
 
-        // به‌روزرسانی عقربه‌ها
         function updateNeedles() {
-            const redNeedle = document.querySelector(".needle");
             const greenNeedle = document.querySelector(".qibla-needle");
+            const directions = document.querySelector(".directions");
 
-            // چرخاندن عقربه‌ی سبز بر اساس قبله
-            greenNeedle.style.transform = `translate(-50%, 0) rotate(${qiblaDirection - deviceOrientation}deg)`;
+            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+            directions.style.transform = `rotate(${-deviceOrientation}deg)`;
         }
 
-        // به‌روزرسانی قبله هنگام انتخاب شهر
         function updateQibla() {
             const cityInput = document.getElementById("city").value;
             const city = cities[cityInput];
 
             if (city) {
                 qiblaDirection = calculateQibla(city.lat, city.lon);
-                alert(`زاویه‌ی قبله برای ${cityInput}: ${Math.round(qiblaDirection)} درجه محاسبه شد.`);
+                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
                 updateNeedles();
             } else {
                 alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");

@@ -15,38 +15,79 @@
             background-color: #f3f3f3;
         }
 
+        .outer-circle {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 8px solid #ccc;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, #e9e9e9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .compass {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 220px;
+            height: 220px;
             border: 5px solid #000;
             border-radius: 50%;
             background: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .center-circle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #000;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
         }
 
         .fixed-needle {
             position: absolute;
-            width: 4px;
-            height: 120px;
-            background-color: red; /* عقربه ثابت */
+            width: 10px;
+            height: 100px;
+            background: linear-gradient(to bottom, red, rgba(255, 0, 0, 0.088)); /* عقربه ثابت */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
-            transform: translate(-50%, -100%);
+            transform: translateX(-50%) translateY(-100%) rotate(0deg);
             z-index: 2;
+            border-radius: 10px;
         }
 
         .qibla-needle {
             position: absolute;
-            width: 4px;
-            height: 120px;
-            background-color: green; /* عقربه‌ی قبله */
+            width: 10px;
+            height: 100px;
+            background: linear-gradient(to bottom, green, rgba(0, 128, 0, 0.153)); /* عقربه‌ی قبله */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
-            transform: translate(-50%, -100%);
+            transform: translateX(-50%) translateY(-100%) rotate(0deg);
             z-index: 1;
+            border-radius: 10px;
+        }
+
+        .needle-icon {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            top: -22px;
+            left: 50%;
+            transform: translate(-50%, 0);
+        }
+
+        .needle-icon img {
+            width: 100%;
+            height: 100%;
         }
 
         .directions {
@@ -60,8 +101,9 @@
 
         .direction {
             position: absolute;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
+            color: #333;
         }
 
         .N { top: 5px; left: 50%; transform: translateX(-50%); }
@@ -83,15 +125,26 @@
     </style>
 </head>
 <body>
-    <div class="compass">
-        <div class="directions">
-            <div class="direction N">N</div>
-            <div class="direction E">E</div>
-            <div class="direction S">S</div>
-            <div class="direction W">W</div>
+    <div class="outer-circle">
+        <div class="compass">
+            <div class="directions">
+                <div class="direction N">N</div>
+                <div class="direction E">E</div>
+                <div class="direction S">S</div>
+                <div class="direction W">W</div>
+            </div>
+            <div class="fixed-needle">
+                <div class="needle-icon">
+                    <img src="https://img.icons8.com/fluency/48/sun.png" alt="خورشید">
+                </div>
+            </div>
+            <div class="qibla-needle">
+                <div class="needle-icon">
+                    <img src="https://img.icons8.com/fluency/48/home.png" alt="خانه">
+                </div>
+            </div>
+            <div class="center-circle"></div>
         </div>
-        <div class="fixed-needle"></div> <!-- عقربه ثابت -->
-        <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
     <input type="text" id="city" placeholder="شهر خود را وارد کنید..." list="cities">
@@ -157,7 +210,7 @@
             const greenNeedle = document.querySelector(".qibla-needle");
             const directions = document.querySelector(".directions");
 
-            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+            greenNeedle.style.transform = `translateX(-50%) translateY(-100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
             directions.style.transform = `rotate(${-deviceOrientation}deg)`;
         }
 

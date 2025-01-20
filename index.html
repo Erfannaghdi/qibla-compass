@@ -25,11 +25,11 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .fixed-needle {
+        .needle {
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: red; /* عقربه ثابت */
+            background-color: red; /* عقربه‌ی سمت خورشید */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="compass">
-        <div class="fixed-needle"></div> <!-- عقربه ثابت -->
+        <div class="needle"></div> <!-- عقربه‌ی سمت خورشید -->
         <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
@@ -124,7 +124,7 @@
             const qiblaLatRad = qiblaLat * (Math.PI / 180);
 
             const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
-            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) - 
+            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) -
                       Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
 
             let angle = Math.atan2(y, x) * (180 / Math.PI);
@@ -133,9 +133,13 @@
 
         // به‌روزرسانی عقربه‌ها
         function updateNeedles() {
+            const redNeedle = document.querySelector(".needle");
             const greenNeedle = document.querySelector(".qibla-needle");
 
-            // چرخاندن عقربه‌ی سبز به سمت قبله
+            // چرخاندن عقربه‌ی قرمز بر اساس چرخش دستگاه
+            redNeedle.style.transform = `translate(-50%, -100%) rotate(${-deviceOrientation}deg)`;
+
+            // چرخاندن عقربه‌ی سبز بر اساس قبله
             greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
         }
 
@@ -146,7 +150,7 @@
 
             if (city) {
                 qiblaDirection = calculateQibla(city.lat, city.lon);
-                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
+                alert(`زاویه‌ی قبله برای ${cityInput}: ${Math.round(qiblaDirection)} درجه محاسبه شد.`);
                 updateNeedles();
             } else {
                 alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");

@@ -25,11 +25,11 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .needle {
+        .fixed-needle {
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: red; /* عقربه‌ی سمت خورشید */
+            background-color: red; /* عقربه ثابت */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="compass">
-        <div class="needle"></div> <!-- عقربه‌ی سمت خورشید -->
+        <div class="fixed-needle"></div> <!-- عقربه ثابت -->
         <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
@@ -106,7 +106,16 @@
 
         let deviceOrientation = 0; // چرخش دستگاه
         let qiblaDirection = 0; // زاویه قبله
-        let sunDirection = 0; // زاویه خورشید
+
+        // بررسی پشتیبانی از DeviceOrientationEvent
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", (event) => {
+                deviceOrientation = event.alpha; // دریافت زاویه‌ی دستگاه
+                updateNeedles();
+            });
+        } else {
+            alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
+        }
 
         // محاسبه زاویه قبله بر اساس موقعیت کاربر
         function calculateQibla(lat, lon) {
@@ -122,52 +131,26 @@
             return (angle + 360) % 360; // نرمال‌سازی زاویه
         }
 
-        // محاسبه زاویه خورشید بر اساس زمان و موقعیت جغرافیایی
-        function calculateSunDirection(lat, lon) {
-            const now = new Date();
-            const hours = now.getUTCHours();
-            const minutes = now.getUTCMinutes();
-            const time = hours + minutes / 60;
-
-            // نمونه ساده برای محاسبه:
-            return (time / 24) * 360;
-        }
-
         // به‌روزرسانی عقربه‌ها
         function updateNeedles() {
-            const redNeedle = document.querySelector(".needle");
             const greenNeedle = document.querySelector(".qibla-needle");
-
-            // چرخاندن عقربه‌ی قرمز به سمت خورشید
-            redNeedle.style.transform = `translate(-50%, -100%) rotate(${sunDirection - deviceOrientation}deg)`;
 
             // چرخاندن عقربه‌ی سبز به سمت قبله
             greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
         }
 
-        // تنظیم مقادیر قبله و خورشید
+        // به‌روزرسانی قبله هنگام انتخاب شهر
         function updateQibla() {
             const cityInput = document.getElementById("city").value;
             const city = cities[cityInput];
 
             if (city) {
                 qiblaDirection = calculateQibla(city.lat, city.lon);
-                sunDirection = calculateSunDirection(city.lat, city.lon);
-                alert(`زاویه‌ی قبله و خورشید برای ${cityInput} محاسبه شد.`);
+                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
                 updateNeedles();
             } else {
                 alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");
             }
-        }
-
-        // بررسی پشتیبانی از DeviceOrientationEvent
-        if (window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientation", (event) => {
-                deviceOrientation = event.alpha; // دریافت زاویه‌ی دستگاه
-                updateNeedles();
-            });
-        } else {
-            alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
         }
     </script>
 </body>

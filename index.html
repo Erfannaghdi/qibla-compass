@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Compass</title>
+    <title>قبله‌نمای واقعی</title>
     <style>
         body {
             display: flex;
@@ -29,7 +29,7 @@
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: red; /* Sun-aligned needle */
+            background-color: red; /* عقربه‌ی سمت خورشید */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
@@ -41,7 +41,7 @@
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: green; /* Qibla direction needle */
+            background-color: green; /* عقربه‌ی قبله */
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
@@ -64,48 +64,60 @@
 </head>
 <body>
     <div class="compass">
-        <div class="needle"></div> <!-- Red needle: aligns with phone orientation -->
-        <div class="qibla-needle"></div> <!-- Green needle: points to Qibla -->
+        <div class="needle"></div> <!-- عقربه‌ی سمت خورشید -->
+        <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
-    <input type="text" id="city" placeholder="Enter your city..." list="cities">
+    <input type="text" id="city" placeholder="شهر خود را وارد کنید..." list="cities">
     <datalist id="cities">
-        <option value="New York">
-        <option value="London">
-        <option value="Mecca">
-        <option value="Paris">
-        <option value="Tokyo">
+        <option value="تهران">
+        <option value="مشهد">
+        <option value="شیراز">
+        <option value="اصفهان">
+        <option value="تبریز">
+        <option value="قم">
+        <option value="اهواز">
+        <option value="کرمان">
+        <option value="همدان">
+        <option value="یزد">
+        <option value="شاهرود">
     </datalist>
-    <button onclick="updateQibla()">Find Qibla</button>
+    <button onclick="updateQibla()">پیدا کردن قبله</button>
 
     <script>
-        // Coordinates of Mecca (Qibla)
+        // مختصات قبله (مکه)
         const qiblaLat = 21.4225;
         const qiblaLon = 39.8262;
 
-        // City data (latitude and longitude)
+        // اطلاعات شهرها (عرض و طول جغرافیایی)
         const cities = {
-            "New York": { lat: 40.7128, lon: -74.0060 },
-            "London": { lat: 51.5074, lon: -0.1278 },
-            "Mecca": { lat: 21.4225, lon: 39.8262 },
-            "Paris": { lat: 48.8566, lon: 2.3522 },
-            "Tokyo": { lat: 35.6895, lon: 139.6917 }
+            "تهران": { lat: 35.6892, lon: 51.3890 },
+            "مشهد": { lat: 36.2605, lon: 59.6168 },
+            "شیراز": { lat: 29.6190, lon: 52.5387 },
+            "اصفهان": { lat: 32.6613, lon: 51.6804 },
+            "تبریز": { lat: 38.0962, lon: 46.2738 },
+            "قم": { lat: 34.6399, lon: 50.8759 },
+            "اهواز": { lat: 31.3183, lon: 48.6706 },
+            "کرمان": { lat: 30.2839, lon: 57.0834 },
+            "همدان": { lat: 34.7992, lon: 48.5146 },
+            "یزد": { lat: 31.8974, lon: 54.3569 },
+            "شاهرود": { lat: 36.4180, lon: 54.9763 }
         };
 
-        let deviceOrientation = 0; // Alpha rotation (device direction)
-        let qiblaDirection = 0; // Calculated Qibla direction
+        let deviceOrientation = 0; // چرخش دستگاه
+        let qiblaDirection = 0; // زاویه قبله
 
-        // Check if DeviceOrientationEvent is supported
+        // بررسی پشتیبانی از DeviceOrientationEvent
         if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", (event) => {
-                deviceOrientation = event.alpha; // Get the phone's rotation angle
+                deviceOrientation = event.alpha; // دریافت زاویه‌ی دستگاه
                 updateNeedles();
             });
         } else {
-            alert("Your device does not support compass functionality.");
+            alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
         }
 
-        // Calculate Qibla direction based on user location
+        // محاسبه زاویه قبله بر اساس موقعیت کاربر
         function calculateQibla(lat, lon) {
             const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
             const latRad = lat * (Math.PI / 180);
@@ -116,32 +128,32 @@
                       Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
 
             let angle = Math.atan2(y, x) * (180 / Math.PI);
-            return (angle + 360) % 360; // Normalize angle
+            return (angle + 360) % 360; // نرمال‌سازی زاویه
         }
 
-        // Update the direction of the needles
+        // به‌روزرسانی عقربه‌ها
         function updateNeedles() {
             const redNeedle = document.querySelector(".needle");
             const greenNeedle = document.querySelector(".qibla-needle");
 
-            // Rotate red needle based on device orientation
+            // چرخاندن عقربه‌ی قرمز بر اساس چرخش دستگاه
             redNeedle.style.transform = `translate(-50%, -100%) rotate(${-deviceOrientation}deg)`;
 
-            // Rotate green needle based on Qibla direction relative to device orientation
+            // چرخاندن عقربه‌ی سبز بر اساس قبله
             greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
         }
 
-        // Update Qibla direction when the user selects a city
+        // به‌روزرسانی قبله هنگام انتخاب شهر
         function updateQibla() {
             const cityInput = document.getElementById("city").value;
             const city = cities[cityInput];
 
             if (city) {
                 qiblaDirection = calculateQibla(city.lat, city.lon);
-                alert(`Qibla direction for ${cityInput} is calculated.`);
+                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
                 updateNeedles();
             } else {
-                alert("City not found. Please choose a valid city.");
+                alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");
             }
         }
     </script>

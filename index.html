@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قبله‌نمای واقعی</title>
+    <title>قبله‌نما</title>
     <style>
         body {
             display: flex;
@@ -29,11 +29,11 @@
             position: absolute;
             width: 4px;
             height: 120px;
-            background-color: red; /* عقربه‌ی سمت خورشید */
+            background-color: red; /* عقربه‌ی ثابت به سمت سر گوشی */
             top: 50%;
             left: 50%;
-            transform-origin: bottom center;
-            transform: translate(-50%, -100%);
+            transform-origin: center top;
+            transform: translate(-50%, 0) rotate(0deg);
             z-index: 2;
         }
 
@@ -44,8 +44,8 @@
             background-color: green; /* عقربه‌ی قبله */
             top: 50%;
             left: 50%;
-            transform-origin: bottom center;
-            transform: translate(-50%, -100%);
+            transform-origin: center top;
+            transform: translate(-50%, 0) rotate(0deg);
             z-index: 1;
         }
 
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="compass">
-        <div class="needle"></div> <!-- عقربه‌ی سمت خورشید -->
+        <div class="needle"></div> <!-- عقربه‌ی ثابت -->
         <div class="qibla-needle"></div> <!-- عقربه‌ی قبله -->
     </div>
 
@@ -136,11 +136,8 @@
             const redNeedle = document.querySelector(".needle");
             const greenNeedle = document.querySelector(".qibla-needle");
 
-            // چرخاندن عقربه‌ی قرمز بر اساس چرخش دستگاه
-            redNeedle.style.transform = `translate(-50%, -100%) rotate(${-deviceOrientation}deg)`;
-
             // چرخاندن عقربه‌ی سبز بر اساس قبله
-            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+            greenNeedle.style.transform = `translate(-50%, 0) rotate(${qiblaDirection - deviceOrientation}deg)`;
         }
 
         // به‌روزرسانی قبله هنگام انتخاب شهر

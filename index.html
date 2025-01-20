@@ -106,6 +106,59 @@
 
         let deviceOrientation = 0; // چرخش دستگاه
         let qiblaDirection = 0; // زاویه قبله
+        let sunDirection = 0; // زاویه خورشید
+
+        // محاسبه زاویه قبله بر اساس موقعیت کاربر
+        function calculateQibla(lat, lon) {
+            const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
+            const latRad = lat * (Math.PI / 180);
+            const qiblaLatRad = qiblaLat * (Math.PI / 180);
+
+            const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
+            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) - 
+                      Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
+
+            let angle = Math.atan2(y, x) * (180 / Math.PI);
+            return (angle + 360) % 360; // نرمال‌سازی زاویه
+        }
+
+        // محاسبه زاویه خورشید بر اساس زمان و موقعیت جغرافیایی
+        function calculateSunDirection(lat, lon) {
+            const now = new Date();
+            const hours = now.getUTCHours();
+            const minutes = now.getUTCMinutes();
+            const time = hours + minutes / 60;
+
+            // نمونه ساده برای محاسبه:
+            return (time / 24) * 360;
+        }
+
+        // به‌روزرسانی عقربه‌ها
+        function updateNeedles() {
+            const redNeedle = document.querySelector(".needle");
+            const greenNeedle = document.querySelector(".qibla-needle");
+
+            // چرخاندن عقربه‌ی قرمز به سمت خورشید
+            redNeedle.style.transform = `translate(-50%, -100%) rotate(${sunDirection - deviceOrientation}deg)`;
+
+            // چرخاندن عقربه‌ی سبز به سمت قبله
+            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+        }
+
+        // تنظیم مقادیر قبله و خورشید
+        function updateQibla() {
+            const cityInput = document.getElementById("city").value;
+            const city = cities[cityInput];
+
+            if (city) {
+                qiblaDirection = calculateQibla(city.lat, city.lon);
+                sunDirection = calculateSunDirection(city.lat, city.lon);
+                alert(`زاویه‌ی قبله و خورشید برای ${cityInput} محاسبه شد.`);
+                updateNeedles();
+            } else {
+                alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");
+            }
+        }
 
         // بررسی پشتیبانی از DeviceOrientationEvent
         if (window.DeviceOrientationEvent) {
@@ -115,46 +168,6 @@
             });
         } else {
             alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
-        }
-
-        // محاسبه زاویه قبله بر اساس موقعیت کاربر
-        function calculateQibla(lat, lon) {
-            const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
-            const latRad = lat * (Math.PI / 180);
-            const qiblaLatRad = qiblaLat * (Math.PI / 180);
-
-            const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
-            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) -
-                      Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
-
-            let angle = Math.atan2(y, x) * (180 / Math.PI);
-            return (angle + 360) % 360; // نرمال‌سازی زاویه
-        }
-
-        // به‌روزرسانی عقربه‌ها
-        function updateNeedles() {
-            const redNeedle = document.querySelector(".needle");
-            const greenNeedle = document.querySelector(".qibla-needle");
-
-            // چرخاندن عقربه‌ی قرمز بر اساس چرخش دستگاه
-            redNeedle.style.transform = `translate(-50%, -100%) rotate(${-deviceOrientation}deg)`;
-
-            // چرخاندن عقربه‌ی سبز بر اساس قبله
-            greenNeedle.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
-        }
-
-        // به‌روزرسانی قبله هنگام انتخاب شهر
-        function updateQibla() {
-            const cityInput = document.getElementById("city").value;
-            const city = cities[cityInput];
-
-            if (city) {
-                qiblaDirection = calculateQibla(city.lat, city.lon);
-                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
-                updateNeedles();
-            } else {
-                alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");
-            }
         }
     </script>
 </body>

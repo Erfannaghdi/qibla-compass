@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قبله‌نمای واقعی</title>
+    <title>قبله‌نمای دقیق با ماه</title>
     <style>
         body {
             display: flex;
@@ -140,7 +140,7 @@
             </div>
             <div class="qibla-needle">
                 <div class="needle-icon">
-                    <img src="https://img.icons8.com/fluency/48/home.png" alt="خانه">
+                    <img src="https://img.icons8.com/fluency/48/moon.png" alt="ماه">
                 </div>
             </div>
             <div class="center-circle"></div>
@@ -161,7 +161,7 @@
         <option value="یزد">
         <option value="شاهرود">
     </datalist>
-    <button onclick="updateQibla()">پیدا کردن قبله</button>
+    <button onclick="updateQibla()">پیدا کردن قبله با ماه</button>
 
     <script>
         const qiblaLat = 21.4225;
@@ -183,24 +183,29 @@
 
         let deviceOrientation = 0;
         let qiblaDirection = 0;
+        let moonDirection = 0;
 
         if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", (event) => {
-                deviceOrientation = event.alpha; 
+                deviceOrientation = event.alpha;
                 updateNeedles();
             });
         } else {
             alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
         }
 
-        function calculateQibla(lat, lon) {
-            const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
-            const latRad = lat * (Math.PI / 180);
-            const qiblaLatRad = qiblaLat * (Math.PI / 180);
+        // محاسبه قبله با ماه
+        function calculateMoonQibla(lat, lon) {
+            const moonLat = 0;  // مختصات تقریبی ماه
+            const moonLon = 0;  // مختصات تقریبی ماه
 
-            const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
-            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) - 
-                      Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
+            const deltaLon = (moonLon - lon) * (Math.PI / 180);
+            const latRad = lat * (Math.PI / 180);
+            const moonLatRad = moonLat * (Math.PI / 180);
+
+            const y = Math.sin(deltaLon) * Math.cos(moonLatRad);
+            const x = Math.cos(latRad) * Math.sin(moonLatRad) - 
+                      Math.sin(latRad) * Math.cos(moonLatRad) * Math.cos(deltaLon);
 
             let angle = Math.atan2(y, x) * (180 / Math.PI);
             return (angle + 360) % 360;
@@ -210,7 +215,7 @@
             const greenNeedle = document.querySelector(".qibla-needle");
             const directions = document.querySelector(".directions");
 
-            greenNeedle.style.transform = `translateX(-50%) translateY(-100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
+            greenNeedle.style.transform = `translateX(-50%) translateY(-100%) rotate(${moonDirection - deviceOrientation}deg)`;
             directions.style.transform = `rotate(${-deviceOrientation}deg)`;
         }
 
@@ -219,8 +224,8 @@
             const city = cities[cityInput];
 
             if (city) {
-                qiblaDirection = calculateQibla(city.lat, city.lon);
-                alert(`زاویه‌ی قبله برای ${cityInput} محاسبه شد.`);
+                moonDirection = calculateMoonQibla(city.lat, city.lon);
+                alert(`قبله بر اساس ماه برای ${cityInput} محاسبه شد.`);
                 updateNeedles();
             } else {
                 alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");

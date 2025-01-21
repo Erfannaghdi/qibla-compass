@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قبله‌نمای دقیق با ماه</title>
+    <title>قبله‌نمای دقیق</title>
     <style>
         body {
             display: flex;
@@ -53,7 +53,7 @@
         .fixed-needle {
             position: absolute;
             width: 10px;
-            height: 100px;
+            height: 95px;
             background: linear-gradient(to bottom, red, rgba(255, 0, 0, 0.088)); /* عقربه ثابت */
             top: 50%;
             left: 50%;
@@ -66,7 +66,7 @@
         .qibla-needle {
             position: absolute;
             width: 10px;
-            height: 100px;
+            height: 95px;
             background: linear-gradient(to bottom, green, rgba(0, 128, 0, 0.153)); /* عقربه‌ی قبله */
             top: 50%;
             left: 50%;
@@ -78,9 +78,9 @@
 
         .needle-icon {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            top: -22px;
+            width: 25px;
+            height: 25px;
+            top: -32px;
             left: 50%;
             transform: translate(-50%, 0);
         }
@@ -122,6 +122,9 @@
         #city {
             width: 220px;
         }
+        .hidden{
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -135,12 +138,13 @@
             </div>
             <div class="fixed-needle">
                 <div class="needle-icon">
-                    <img src="https://img.icons8.com/fluency/48/sun.png" alt="خورشید">
+                    <img id="sun-q" src="https://img.icons8.com/fluency/48/sun.png" alt="خورشید">
+                    <img id="moon-q" src="https://img.icons8.com/?size=100&id=m1w5SYBzprk5&format=png&color=000000" class="hidden" alt="ماه">
                 </div>
             </div>
             <div class="qibla-needle">
                 <div class="needle-icon">
-                    <img src="https://img.icons8.com/fluency/48/moon.png" alt="ماه">
+                    <img src="/1.webp" alt="مکه">
                 </div>
             </div>
             <div class="center-circle"></div>
@@ -161,7 +165,9 @@
         <option value="یزد">
         <option value="شاهرود">
     </datalist>
-    <button onclick="updateQibla()">پیدا کردن قبله با ماه</button>
+
+    <button  onclick="updateQibla('sun')">پیدا کردن قبله با خورشید</button>
+    <button  onclick="updateQibla('moon')">پیدا کردن قبله با ماه</button>
 
     <script>
         const qiblaLat = 21.4225;
@@ -183,7 +189,6 @@
 
         let deviceOrientation = 0;
         let qiblaDirection = 0;
-        let moonDirection = 0;
 
         if (window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", (event) => {
@@ -194,7 +199,19 @@
             alert("مرورگر شما از قطب‌نما پشتیبانی نمی‌کند.");
         }
 
-        // محاسبه قبله با ماه
+        function calculateQibla(lat, lon) {
+            const deltaLon = (qiblaLon - lon) * (Math.PI / 180);
+            const latRad = lat * (Math.PI / 180);
+            const qiblaLatRad = qiblaLat * (Math.PI / 180);
+
+            const y = Math.sin(deltaLon) * Math.cos(qiblaLatRad);
+            const x = Math.cos(latRad) * Math.sin(qiblaLatRad) - 
+                      Math.sin(latRad) * Math.cos(qiblaLatRad) * Math.cos(deltaLon);
+
+            let angle = Math.atan2(y, x) * (180 / Math.PI);
+            return (angle + 360) % 360;
+        }
+
         function calculateMoonQibla(lat, lon) {
             const moonLat = 0;  // مختصات تقریبی ماه
             const moonLon = 0;  // مختصات تقریبی ماه
@@ -215,17 +232,27 @@
             const greenNeedle = document.querySelector(".qibla-needle");
             const directions = document.querySelector(".directions");
 
-            greenNeedle.style.transform = `translateX(-50%) translateY(-100%) rotate(${moonDirection - deviceOrientation}deg)`;
+            greenNeedle.style.transform = `translateX(-50%) translateY(-100%) rotate(${qiblaDirection - deviceOrientation}deg)`;
             directions.style.transform = `rotate(${-deviceOrientation}deg)`;
         }
 
-        function updateQibla() {
+        function updateQibla(type) {
             const cityInput = document.getElementById("city").value;
             const city = cities[cityInput];
 
             if (city) {
-                moonDirection = calculateMoonQibla(city.lat, city.lon);
-                alert(`قبله بر اساس ماه برای ${cityInput} محاسبه شد.`);
+                if (type === 'sun') {
+                    qiblaDirection = calculateQibla(city.lat, city.lon);
+                    document.getElementById('sun-q').classList.remove('hidden')
+                    document.getElementById('moon-q').classList.add('hidden')
+                    alert(`زاویه‌ی قبله برای ${cityInput} بر اساس خورشید محاسبه شد.`);
+
+                } else if (type === 'moon') {
+                    qiblaDirection = calculateMoonQibla(city.lat, city.lon);
+                    document.getElementById('moon-q').classList.remove('hidden')
+                    document.getElementById('sun-q').classList.add('hidden')
+                    alert(`زاویه‌ی قبله برای ${cityInput} بر اساس ماه محاسبه شد.`);
+                }
                 updateNeedles();
             } else {
                 alert("شهر انتخابی معتبر نیست. لطفاً یک شهر معتبر انتخاب کنید.");
